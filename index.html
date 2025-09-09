@@ -7,35 +7,41 @@
 </head>
 <body>
   <h2>Lượt truy cập</h2>
-  <div id="visitor-info"></div>
+  <div id="visitor-info">Đang lấy thông tin...</div>
 
   <script>
     async function getVisitorInfo() {
-      const res = await fetch('https://api.db-ip.com/v2/free/self');
-      const data = await res.json();
+      try {
+        const res = await fetch('https://api.db-ip.com/v2/free/self');
+        const data = await res.json();
 
-      const ip = data.ip;
-      const country = data.country_name;
-      const region = data.region;
-      const city = data.city;
+        const ip = data.ipAddress;
+        const country = data.countryName;
+        const region = data.stateProv;
+        const city = data.city;
 
-      // Hiển thị thông tin
-      document.getElementById('visitor-info').innerHTML = `
-        <p><strong>IP:</strong> ${ip}</p>
-        <p><strong>Quốc gia:</strong> ${country}</p>
-        <p><strong>Thành phố:</strong> ${city}</p>
-        <p><strong>Vùng:</strong> ${region}</p>
-      `;
+        // Hiển thị thông tin
+        document.getElementById('visitor-info').innerHTML = `
+          <p><strong>IP:</strong> ${ip}</p>
+          <p><strong>Quốc gia:</strong> ${country}</p>
+          <p><strong>Thành phố:</strong> ${city}</p>
+          <p><strong>Vùng:</strong> ${region}</p>
+        `;
 
-      // Gửi dữ liệu đến Google Script (hoặc server khác nếu có)
-      fetch("https://script.google.com/macros/s/AKfycbz2nTX3coAO5LIlt9GUupU4X6VgA_1Z4fRtQNbE9RoMhticwL9zGs3KLbQlSwmPzi-J/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ip, country, city, region, time: new Date().toISOString() })
-      });
+        // Gửi dữ liệu đến Google Sheet
+        fetch("https://script.google.com/macros/s/AKfycbz2nTX3coAO5LIlt9GUupU4X6VgA_1Z4fRtQNbE9RoMhticwL9zGs3KLbQlSwmPzi-J/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ ip, country, city, region, time: new Date().toISOString() })
+        });
+
+      } catch (error) {
+        document.getElementById('visitor-info').innerHTML = "Không lấy được thông tin IP.";
+        console.error("Lỗi khi lấy IP:", error);
+      }
     }
 
     getVisitorInfo();
